@@ -1,13 +1,13 @@
-# Covid
+# Async Covid
 
-[![CircleCI](https://circleci.com/gh/ahmednafies/covid.svg?style=shield)](https://circleci.com/gh/ahmednafies/covid) [![codecov](https://codecov.io/gh/ahmednafies/covid/branch/master/graph/badge.svg)](https://codecov.io/gh/ahmednafies/covid) ![GitHub Pipenv locked Python version](https://img.shields.io/github/pipenv/locked/python-version/ahmednafies/covid) [![Downloads](https://pepy.tech/badge/covid)](https://pepy.tech/project/covid) ![GitHub](https://img.shields.io/github/license/ahmednafies/covid)
+Based on Ahmednafies' COVID [module](https://github.com/ahmednafies/covid).
 
 ## Description
 
-Python package to get information regarding the novel corona virus provided
+An async Python package to get information regarding the novel corona virus provided
 by Johns Hopkins university and worldometers.info
 
-Full Documentation can be found [here](https://ahmednafies.github.io/covid/)
+Documentation not ready yet, but everything is shown in this README file.
 
 ![corona.jpeg](docs/img/corona.jpeg)
 
@@ -17,12 +17,13 @@ Full Documentation can be found [here](https://ahmednafies.github.io/covid/)
 
 ## How to install
 
-    pip install covid
+    pip install async-covid
 
 ## Dependencies
 
     pydantic
-    requests
+    asyncio
+    aiohttp
 
 ## How to use
 
@@ -33,38 +34,39 @@ Full Documentation can be found [here](https://ahmednafies.github.io/covid/)
 ### Get All Data
 
 ```python
-from covid import Covid
+from async_covid import Covid
 
 covid = Covid()
-covid.get_data()
+# Make sure you are using an async function
+print(await covid.get_data())
 ```
 
 #### Result
 
 ```python
 [
-    {
-        'id': '53',
-        'country': 'China',
-        'confirmed': 81020,
-        'active': 9960,
-        'deaths': 3217,
-        'recovered': 67843,
-        'latitude': 30.5928,
-        'longitude': 114.3055,
-        'last_update': 1584097775000
-    },
-    {
-        'id': '115',
-        'country': 'Italy',
-        'confirmed': 24747,
-        'active': 20603,
-        'deaths': 1809,
-        'recovered': 2335,
-        'latitude': 41.8719,
-        'longitude': 12.5674,
-        'last_update': 1584318130000
-    },
+    CovidModel<
+        id=175, 
+        country=US, 
+        confirmed=7554434, 
+        active=4342532, 
+        deaths=211905, 
+        recovered=2999895, 
+        latitude=40.0, 
+        longitude=-100.0, 
+        last_update=1602163423000
+        >,
+    CovidModel<
+        id=14, 
+        country=Bangladesh,
+        confirmed=374592, 
+        active=80816,
+        deaths=5460,
+        recovered=288316,
+        latitude=23.685, 
+        longitude=90.3563, 
+        last_update=1602163423000
+        >,
     ...
 ]
 ```
@@ -76,15 +78,16 @@ when using `get_status_by_country_name`, eg. "The Republic of Moldova" or just "
 So use this when you need to know the country exact name that you can use.
 
 ```python
-countries = covid.list_countries()
+# Make sure you are using an async function
+countries = await covid.list_countries()
 ```
 
 #### Result
 
 ```python
 [
-    {'id': '53', 'country': 'China'},
-    {'id': '115', 'country': 'Italy'}
+    CountryModel<id=175, name=US>, 
+    CountryModel<id=80, name=India>,
     ...
 ]
 ```
@@ -92,69 +95,69 @@ countries = covid.list_countries()
 ### Get Status By Country ID
 
 ```python
-italy_cases = covid.get_status_by_country_id(115)
+italy_cases = await covid.get_status_by_country_id(14)
 ```
 
 #### Result
 
 ```python
-{
-    'id': '115',
-    'country': 'Italy',
-    'confirmed': 24747,
-    'active': 20603,
-    'deaths': 1809,
-    'recovered': 2335,
-    'latitude': 41.8719,
-    'longitude': 12.5674,
-    'last_update': 1584318130000
-}
+CovidModel<
+    id=14, 
+    country=Bangladesh, 
+    confirmed=374592,
+    active=80816,
+    deaths=5460, 
+    recovered=288316,
+    latitude=23.685,
+    longitude=90.3563,
+    last_update=1602163423000
+>
 ```
 
 ### Get Status By Country Name
 
 ```python
-italy_cases = covid.get_status_by_country_name("italy")
+italy_cases = await covid.get_status_by_country_name("bangladesh")
 ```
 
 #### Result
 
 ```python
-{
-    'id': '115',
-    'country': 'Italy',
-    'confirmed': 24747,
-    'active': 20603,
-    'deaths': 1809,
-    'recovered': 2335,
-    'latitude': 41.8719,
-    'longitude': 12.5674,
-    'last_update': 1584318130000
-}
+CovidModel<
+    id=14, 
+    country=Bangladesh, 
+    confirmed=374592,
+    active=80816,
+    deaths=5460, 
+    recovered=288316,
+    latitude=23.685,
+    longitude=90.3563,
+    last_update=1602163423000
+>
 ```
 
 ### Get Total Active cases
 
 ```python
-active = covid.get_total_active_cases()
+active = await covid.get_total_active_cases()
 ```
 
 ### Get Total Confirmed cases
 
 ```python
-confirmed = covid.get_total_confirmed_cases()
+confirmed = await covid.get_total_confirmed_cases()
 ```
 
 ### Get Total Recovered cases
 
 ```python
-recovered = covid.get_total_recovered()
+recovered = await covid.get_total_recovered()
 ```
 
 ### Get Total Deaths
 
 ```python
-deaths = covid.get_total_deaths()
+deaths = await covid.get_total_deaths()
 ```
 
 ## Getting data from Worldometers.info
@@ -168,41 +171,27 @@ covid = Covid(source="worldometers")
 ### Get Data
 
 ```python
-covid.get_data()
+await covid.get_data()
 ```
 
 #### Result
 
 ```python
 [
-    {
-        'country': 'USA',
-        'confirmed': 311637,
-        'new_cases': 280,
-        'deaths': 8454,
-        'recovered': 14828,
-        'active': 288355,
-        'critical': 8206,
-        'new_deaths': 2,
-        'total_tests': 1656897,
-        'total_tests_per_million': Decimal('0'),
-        'total_cases_per_million': Decimal('941'),
-        'total_deaths_per_million': Decimal('26')
-    },
-    {
-        'active': 1376,
-        'confirmed': 81669,
-        'country': 'China',
-        'critical': 295,
-        'deaths': 3329,
-        'new_cases': 30,
-        'new_deaths': 3,
-        'recovered': 76964,
-        'total_cases_per_million': Decimal('57'),
-        'total_deaths_per_million': Decimal('2'),
-        'total_tests': 0,
-        'total_tests_per_million': Decimal('0')
-    }
+    CovidModel<
+    country=North America, 
+    confirmed=9332106, 
+    new_cases=10355, 
+    deaths=322513, 
+    recovered=6101706,
+    active=2907887, 
+    critical=17932,
+    new_deaths=512,
+    total_tests=0,
+    total_tests_per_million=0,
+    total_cases_per_million=0, 
+    total_deaths_per_million=0,
+    population=0>
     ...
 ]
 
@@ -211,32 +200,29 @@ covid.get_data()
 ### Get Status By Country Name
 
 ```python
-covid.get_status_by_country_name("italy")
+await covid.get_status_by_country_name("india")
 ```
 
 #### Result
 
 ```python
-{
-    'active': 88274,
-    'confirmed': 124632,
-    'country': 'Italy',
-    'critical': 3994,
-    'deaths': 15362,
-    'new_cases': 0,
-    'new_deaths': 0,
-    'recovered': 20996,
-    'total_cases_per_million': Decimal('2061'),
-    'total_deaths_per_million': Decimal('254'),
-    'total_tests': 657224,
-    'total_tests_per_million': Decimal('0')
- }
+CovidModel<
+country=India,
+confirmed=6835655,
+new_cases=2667,
+deaths=105554,
+recovered=5827704,
+active=902397,
+critical=8944,
+new_deaths=0, 
+total_tests=83465975
+>
 ```
 
 ### List Countries
 
 ```python
-countries = covid.list_countries()
+countries = await covid.list_countries()
 ```
 
 #### Result
@@ -255,88 +241,25 @@ countries = covid.list_countries()
 ### Get Total Active cases
 
 ```python
-active = covid.get_total_active_cases()
+active = await covid.get_total_active_cases()
 ```
 
 ### Get Total Confirmed cases
 
 ```python
-confirmed = covid.get_total_confirmed_cases()
+confirmed = await covid.get_total_confirmed_cases()
 ```
 
 ### Get Total Recovered cases
 
 ```python
-recovered = covid.get_total_recovered()
+recovered = await covid.get_total_recovered()
 ```
 
 ### Get Total Deaths
 
 ```python
-deaths = covid.get_total_deaths()
+deaths = await covid.get_total_deaths()
 ```
 
-## CLI 2.0 (New)
-
-```bash
-covid --help
-```
-### Get all data
-
-#### John Hopkins source (default)
-
-```bash
-covid
-```
-
-or
-
-```bash
-covid -s john_hopkins
-```
-
-#### Worldometers source
-
-```bash
-covid -s worldometers
-```
-
-### List Countries
-
-This comes in handy when you need to know the available names of countries
-when using `covid -s 'source' -c 'country_name'`, eg. "The Republic of Moldova" or just "Moldova"
-So use this when you need to know the country exact name that you can use.
-
-```bash
-covid -s worldometers --list-countries
-```
-
-### Get Status By Country Name
-
-```bash
-covid -s worldometers -c sweden
-```
-
-### Get Total Active cases
-
-```bash
-covid -s worldometers -o active
-```
-
-### Get Total Confirmed cases
-
-```bash
-covid -s worldometers -o confirmed
-```
-
-### Get Total Recovered cases
-
-```bash
-covid -s worldometers -o recovered
-```
-
-### Get Total Deaths
-
-```bash
-covid -s worldometers -o deaths
 ```
