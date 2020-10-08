@@ -36,7 +36,7 @@ from async_covid import Covid
 async def main():
     print(await covid.get_data())
     
-if __name__ == __main__:
+if __name__ == '__main__':
     covid = COVID()
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
