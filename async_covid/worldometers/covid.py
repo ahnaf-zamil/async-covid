@@ -2,10 +2,10 @@
 """ Covid coronavirus statistics based on worldometers.info statistics
 
 """
-import requests
+import urllib.request
 from bs4 import BeautifulSoup
-from covid.worldometers.models import CovidModel
-from covid import config
+from async_covid.worldometers.models import CovidModel
+from async_covid import config
 from pydantic import ValidationError
 
 URL = "https://www.worldometers.info/coronavirus/"
@@ -14,6 +14,9 @@ SOURCE = config.WORLDOMETERS
 
 
 class Covid:
+    """Worldometers data for COVID-19
+    Note: Instantiate this class at the beginning of your code since it gets "all" the data when it's instantiated
+    """
     def __init__(self):
         self.__url = URL
         self.__data = {}
@@ -26,8 +29,9 @@ class Covid:
             1. parses html
             2. gets all country data
         """
-        response = requests.get(self.__url)
-        soup = BeautifulSoup(response.text, "html.parser")
+        request = urllib.request.Request(self.__url, headers={'User-Agent':'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.27 Safari/537.17'})
+        response = urllib.request.urlopen(request).read()
+        soup = BeautifulSoup(response, "html.parser")
         table = soup.find("table", attrs={"class": "main_table_countries"})
         headers = table.find_all("th")
         self.__headers = [
@@ -48,7 +52,7 @@ class Covid:
         )
         self.__data = {country[1].lower(): country for country in countries}
 
-    def __format(self, _list: list) -> list:
+    async def __format(self, _list: list) -> list:
         """Method formats a list and returns a fomatted one
         1. removes ','
         2. if there is no value it adds 0
@@ -62,18 +66,18 @@ class Covid:
         _list = [val.strip().replace(",", "") for val in _list]
         return [val if val and val != "N/A" else 0 for val in _list]
 
-    def get_data(self) -> list:
+    async def get_data(self) -> list:
         """Method returns a list of all of the data from worldometers after being formatted
         
         Returns:
             list: List of country data
         """
         return [
-            CovidModel(**dict(zip(self.__headers, self.__format(val)))).dict()
+            CovidModel(**dict(zip(self.__headers, await self.__format(val))))
             for val in self.__data.values()
         ]
 
-    def get_status_by_country_name(self, country_name: str) -> dict:
+    async def get_status_by_country_name(self, country_name: str) -> dict:
         """Method gets country status
         
         Args:
@@ -89,20 +93,20 @@ class Covid:
             country_data = dict(
                 zip(
                     self.__headers,
-                    self.__format(self.__data[country_name.lower()]),
+                    await self.__format(self.__data[country_name.lower()]),
                 )
             )
         except KeyError:
             raise ValueError(
                 f"There is no country called '{country_name}', to check available country names use `list_countries()`"
             )
-        return CovidModel(**country_data).dict()
+        return CovidModel(**country_data)
 
-    def list_countries(self) -> list:
+    async def list_countries(self) -> list:
         return list(self.__data.keys())
 
     @staticmethod
-    def __to_num(string: str) -> int:
+    async def __to_num(string: str) -> int:
         """formats string numbers and converts them to an integer
         e.g '123,456' -> 123456
         
@@ -114,37 +118,37 @@ class Covid:
         """
         return int(string.strip().replace(",", ""))
 
-    def get_total_confirmed_cases(self) -> int:
+    async def get_total_confirmed_cases(self) -> int:
         """Method gets the total number of confirmed cases
         
         Returns:
             int: Number of confirmed cases
         """
-        return self.__to_num(self.__total_cases[0].span.text)
+        return await self.__to_num(self.__total_cases[0].span.text)
 
-    def get_total_deaths(self) -> int:
+    async def get_total_deaths(self) -> int:
         """Method gets the total number of deaths
         
         Returns:
             int: Total number of deaths
         """
-        return self.__to_num(self.__total_cases[1].span.text)
+        return await self.__to_num(self.__total_cases[1].span.text)
 
-    def get_total_recovered(self) -> int:
+    async def get_total_recovered(self) -> int:
         """Method gets the total number of recovered cases
         
         Returns:
             int: Total number of recovered cases
         """
-        return self.__to_num(self.__total_cases[2].span.text)
+        return await self.__to_num(self.__total_cases[2].span.text)
 
-    def get_total_active_cases(self) -> int:
+    async def get_total_active_cases(self) -> int:
         """Method gets the total number of active cases
         
         Returns:
             int: Total number of active cases
         """
-        confirmed = self.get_total_confirmed_cases()
-        deaths = self.get_total_deaths()
-        recovered = self.get_total_recovered()
+        confirmed = await self.get_total_confirmed_cases()
+        deaths = await self.get_total_deaths()
+        recovered = await self.get_total_recovered()
         return confirmed - (recovered + deaths)

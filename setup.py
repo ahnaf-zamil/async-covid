@@ -10,17 +10,17 @@ with io.open("covid/__init__.py", "rt", encoding="utf8") as f:
     version = re.search(r'__version__ = "(.*?)"', f.read()).group(1)
 
 setup(
-    name="covid",
+    name="async-covid",
     version=version,
-    description="Python package to get information regarding the novel corona virus provided by Johns Hopkins university and worldometers.info",
+    description="An async Python package to get information regarding the novel corona virus provided by Johns Hopkins university and worldometers.info. Based on https://github.com/ahmednafies/covid",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://ahmednafies.github.io/covid/",
-    author="Ahmed Nafies",
-    author_email="ahmed.nafies@gmail.com",
+    author="K.M Ahnaf Zail",
+    author_email="ahnafzamil@protonmail.com",
     license="MIT",
-    packages=["covid", "covid.john_hopkins", "covid.worldometers"],
-    install_requires=["requests", "pydantic", "beautifulsoup4", "typer"],
+    packages=["async_covid", "async_covid.john_hopkins", "async_covid.worldometers"],
+    install_requires=["asyncio", "aiohttp", "pydantic", "beautifulsoup4", "typer"],
     extras_require={
         "dev": [
             "pipenv",
@@ -35,7 +35,7 @@ setup(
     },
     project_urls={
         "Documentation": "https://ahmednafies.github.io/covid/",
-        "Source": "https://github.com/ahmednafies/covid",
+        "Source": "https://github.com/ahnaf-zamil/async-covid",
     },
     classifiers=[
         "Intended Audience :: Developers",

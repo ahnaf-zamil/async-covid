@@ -28,3 +28,9 @@ class CovidModel(BaseModel):
         Decimal(0), alias="Deaths/1M pop"
     )
     population: Decimal = Field(Decimal(0), alias = "Population")
+
+    def __str__(self, *args):
+        return f"{self.__class__.__name__}<{', '.join([i + '=' + str(self.__dict__[i]) for i in self.__dict__])}>"
+
+    def __repr__(self):
+        return self.__str__(self)

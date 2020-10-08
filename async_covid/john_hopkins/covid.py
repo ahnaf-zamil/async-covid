@@ -2,9 +2,11 @@
 """ Covid coronavirus statistics based on John Hopkins University statistics
 
 """
-from covid.john_hopkins.models import CovidModel, CountryModel
+from async_covid.john_hopkins.models import CovidModel, CountryModel
 import requests
-from covid import config
+import aiohttp
+import json
+from async_covid import config
 
 BASE_URL = "https://services1.arcgis.com"
 PATH = (
@@ -13,6 +15,11 @@ PATH = (
 URL = BASE_URL + PATH
 SOURCE = config.JOHN_HOPKINS
 
+async def fetch(session, url, params):
+
+    response = await session.get(url, params=params)
+    response = await response.read()
+    return json.loads(response)
 
 class Covid:
     """Class handells all functionality
@@ -23,11 +30,11 @@ class Covid:
         self.source = SOURCE
 
     @staticmethod
-    def __get_total_cases_by_country_id(object_id: str) -> dict:
+    async def __get_total_cases_by_country_id(object_id: str) -> dict:
         """Method formats and encodes the URL for a specific country information regarding Covid
         
         Args:
-            country (str): Country name e.g. "sweden"
+            object_id (str): Country ID e.g. 14 for Bangladesh
         
         Returns:
             dict: Country related information regarding Coronavirus
@@ -54,21 +61,21 @@ class Covid:
             resultRecordCount="1",
             cacheHint="true",
         )
-
-        response = requests.get(URL, params=params).json()
+        async with aiohttp.ClientSession() as session:
+            response = await fetch(session, URL, params=params)
         try:
             return response["features"][0]["attributes"]
         except KeyError:
             raise Exception(response)
 
-    def __get_total_by_case(self, case: str) -> int:
+    async def __get_total_by_case(self, case: str) -> int:
         """Method fetchs the total value of a specific case (Deaths, Confirmed cases and Recovered cases)
         
         Args:
             case (str): cases = "Deaths", "Confirmed" and "Recovered"
         
         Returns:
-            str: Total value
+            int: Total value
         """
         params = dict(
             f="json",
@@ -87,13 +94,14 @@ class Covid:
             ),
             cacheHint="true",
         )
-        response = requests.get(URL, params=params).json()
+        async with aiohttp.ClientSession() as session:
+            response = await fetch(session, URL, params=params)
         try:
-            return response["features"][0]["attributes"]["value"]
+            return int(response["features"][0]["attributes"]["value"])
         except KeyError:
             raise Exception(response)
 
-    def __get_all_cases(self) -> list:
+    async def __get_all_cases(self) -> list:
         """Method fetches all data related to Covid
         
         Returns:
@@ -123,109 +131,92 @@ class Covid:
             resultRecordCount="200",
             cacheHint="true",
         )
-        response = requests.get(URL, params=params).json()
+        async with aiohttp.ClientSession() as session:
+            response = await fetch(session, URL, params=params)
         try:
             return response["features"]
         except KeyError:
             raise Exception(response)
 
-    def get_data(self) -> list:
+    async def get_data(self) -> list:
         """Method fetches all data related to Covid
         """
 
-        cases = self.__get_all_cases()
-        return [CovidModel(**case["attributes"]).dict() for case in cases]
+        cases = await self.__get_all_cases()
+        return [CovidModel(**case["attributes"]) for case in cases]
 
-    def get_total_active_cases(self) -> int:
+    async def get_total_active_cases(self) -> int:
         """Method fetches and returns total number of active cases
         
         Returns:
             int: Total number of active at this time
         """
-        return self.__get_total_by_case("Active")
+        return await self.__get_total_by_case("Active")
 
-    def get_total_deaths(self) -> int:
+    async def get_total_deaths(self) -> int:
         """Method fetches and returns total deaths number
         
         Returns:
             int: Total number of deaths at this time
         """
-        return self.__get_total_by_case("Deaths")
+        return await self.__get_total_by_case("Deaths")
 
-    def get_total_confirmed_cases(self) -> int:
+    async def get_total_confirmed_cases(self) -> int:
         """Method fetches and returns the total number of confirmed cases
         
         Returns:
             int: Total number of confirmed cases at this time
         """
-        return self.__get_total_by_case("Confirmed")
+        return await self.__get_total_by_case("Confirmed")
 
-    def get_total_recovered(self) -> int:
+    async def get_total_recovered(self) -> int:
         """Method fetches and returns the total number of recovered cases
         
         Returns:
             int: Total number of recovered cases at this time
         """
-        return self.__get_total_by_case("Recovered")
+        return await self.__get_total_by_case("Recovered")
 
-    def list_countries(self) -> list:
+    async def list_countries(self) -> list:
         """Method returns the names of all countries available, so that it can be used when
         querying status by a specific country
 
         Returns:
-            list[str]: list of country names
+            list[async_covid.JohnHopkinsCovidModel]: list of country models
         """
-        cases = self.__get_all_cases()
-        return [CountryModel(**case["attributes"]).dict() for case in cases]
+        cases = await self.__get_all_cases()
+        return [CountryModel(**case["attributes"]) for case in cases]
 
-    def get_status_by_country_id(self, country_id) -> dict:
+    async def get_status_by_country_id(self, country_id) -> dict:
         """Method fetches and returns specific country information related to coronavirus
         
         Args:
-            country (str):  Country name e.g. "sweden"
+            country_id (str):  Country ID e.g. 14 for Bangladesh
         
         Returns:
-            dict: Country related information regarding Coronavirus
+            async_covid.JohnHopkinsCovidModel: Country related information regarding Coronavirus
             example:
-                    {
-                        'country': 'Sweden',
-                        'confirmed': 355,
-                        'active': 334,
-                        'deaths': 0,
-                        'recovered': 1,
-                        'latitude': 63.0,
-                        'longitude': 16.0,
-                        'last_update': 1583893094000
-                    }
+                    CovidModel<id=14, country=Bangladesh, confirmed=374592, active=80816, deaths=5460, recovered=288316, latitude=23.685, longitude=90.3563, last_update=1602159825000>
         """
 
-        case = self.__get_total_cases_by_country_id(country_id)
-        return CovidModel(**case).dict()
+        case = await self.__get_total_cases_by_country_id(country_id)
+        return CovidModel(**case)
 
-    def get_status_by_country_name(self, country_name) -> dict:
+    async def get_status_by_country_name(self, country_name) -> dict:
         """Method fetches and returns specific country information related to coronavirus
         
         Args:
-            country (str):  Country name e.g. "sweden"
+            country_name (str):  Country name e.g. "sweden"
         
         Returns:
-            dict: Country related information regarding Coronavirus
+            async_covid.JohnHopkinsCovidModel: Country related information regarding Coronavirus
             example:
-                    {
-                        'country': 'Sweden',
-                        'confirmed': 355,
-                        'active': 334,
-                        'deaths': 0,
-                        'recovered': 1,
-                        'latitude': 63.0,
-                        'longitude': 16.0,
-                        'last_update': 1583893094000
-                    }
+                    CovidModel<id=14, country=Bangladesh, confirmed=374592, active=80816, deaths=5460, recovered=288316, latitude=23.685, longitude=90.3563, last_update=1602159825000>
         """
 
         country = filter(
-            lambda country: country["name"].lower() == country_name.lower(),
-            self.list_countries(),
+            lambda country: country.name.lower() == country_name.lower(),
+            await self.list_countries(),
         )
         try:
             country = next(country)
@@ -233,5 +224,5 @@ class Covid:
             raise ValueError(
                 f"There is no country called '{country_name}', to check available country names use `list_countries()`"
             )
-        case = self.__get_total_cases_by_country_id(country["id"])
-        return CovidModel(**case).dict()
+        case = await self.__get_total_cases_by_country_id(country.id)
+        return CovidModel(**case)

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-from covid.john_hopkins import Covid as JohnHopkinsCovid
-from covid.worldometers import Covid as WorldometersCovid
-from covid import config
+from async_covid.john_hopkins import Covid as JohnHopkinsCovid
+from async_covid.john_hopkins import CovidModel as JohnHopkinsCovidModel
+from async_covid.worldometers import Covid as WorldometersCovid
+from async_covid import config
 
 __author__ = "Ahmed Nafies Okasha Mohamed <ahmed.nafies@gmail.com>"
 __copyright__ = "Copyright 2020, Ahmed Nafies Okasha Mohamed"

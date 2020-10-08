@@ -2,22 +2,22 @@
 """ tests module
 """
 import pytest
-from covid import Covid
+from async_covid import Covid
 from unittest.mock import patch
 
 
 class MockRequestData:
     @staticmethod
-    def json():
+    async def json():
         return {"key": "value"}
 
 
-def test_all_data():
+async def test_all_data():
     covid = Covid()
-    data = covid.get_data()
+    data = await covid.get_data()
     assert data is not None
     assert type(data) == list
-    element = data[0]
+    element = data[0].dict()
     assert "country" in element
     assert "confirmed" in element
     assert "deaths" in element
@@ -27,12 +27,12 @@ def test_all_data():
     assert "last_update" in element
 
 
-def test_get_by_country_id():
+async def test_get_by_country_id():
     covid = Covid()
     countries = covid.list_countries()
-    country = filter(lambda country: country["name"] == "Sweden", countries)
+    country = filter(lambda country: country.name == "Sweden", countries)
     country = next(country)
-    data = covid.get_status_by_country_id(country["id"])
+    data = await covid.get_status_by_country_id(country.id).dict()
     assert type(data) is dict
     assert "country" in data
     assert "confirmed" in data
@@ -45,9 +45,9 @@ def test_get_by_country_id():
     assert data["country"] == "Sweden"
 
 
-def test_get_by_country_name():
+async def test_get_by_country_name():
     covid = Covid()
-    data = covid.get_status_by_country_name("sweden")
+    data = await covid.get_status_by_country_name("sweden").dict()
     assert type(data) is dict
     assert "country" in data
     assert "confirmed" in data
@@ -60,9 +60,9 @@ def test_get_by_country_name():
     assert data["country"] == "Sweden"
 
 
-def test_get_by_country_name_initials():
+async def test_get_by_country_name_initials():
     covid = Covid()
-    data = covid.get_status_by_country_name("US")
+    data = await covid.get_status_by_country_name("US").dict()
     assert type(data) is dict
     assert "country" in data
     assert "confirmed" in data
@@ -75,79 +75,79 @@ def test_get_by_country_name_initials():
     assert data["country"] == "US"
 
 
-def test_get_by_country_invalid_name():
+async def test_get_by_country_invalid_name():
     covid = Covid()
     with pytest.raises(ValueError):
-        covid.get_status_by_country_name("USA")
+        await covid.get_status_by_country_name("USA").dict()
 
 
-def test_total_active_cases():
+async def test_total_active_cases():
     covid = Covid()
-    data = covid.get_total_active_cases()
+    data = await covid.get_total_active_cases()
     assert type(data) is int
 
 
-def test_total_confirmed_cases():
+async def test_total_confirmed_cases():
     covid = Covid()
-    data = covid.get_total_confirmed_cases()
+    data = await covid.get_total_confirmed_cases()
     assert type(data) is int
 
 
-def test_total_deaths():
+async def test_total_deaths():
     covid = Covid()
-    data = covid.get_total_deaths()
+    data = await covid.get_total_deaths()
     assert type(data) is int
 
 
-def test_total_recovered():
+async def test_total_recovered():
     covid = Covid()
-    data = covid.get_total_recovered()
+    data = await covid.get_total_recovered()
     assert type(data) is int
 
 
-def test_list_countries():
+async def test_list_countries():
     covid = Covid()
     countries = covid.list_countries()
     assert type(countries) == list
 
 
 @patch("covid.john_hopkins.covid.requests.get", return_value=MockRequestData())
-def test_exception_rasied_on_get_total_active_cases(mock):
+async def test_exception_rasied_on_get_total_active_cases(mock):
     covid = Covid()
     with pytest.raises(Exception):
-        covid.get_total_active_cases()
+        await covid.get_total_active_cases()
 
 
 @patch("covid.john_hopkins.covid.requests.get", return_value=MockRequestData())
-def test_exception_rasied_on_get_total_confirmed_cases(mock):
+async def test_exception_rasied_on_get_total_confirmed_cases(mock):
     covid = Covid()
     with pytest.raises(Exception):
-        covid.get_total_confirmed_cases()
+        await covid.get_total_confirmed_cases()
 
 
 @patch("covid.john_hopkins.covid.requests.get", return_value=MockRequestData())
-def test_exception_rasied_on_get_total_recovered(mock):
+async def test_exception_rasied_on_get_total_recovered(mock):
     covid = Covid()
     with pytest.raises(Exception):
-        covid.get_total_recovered()
+        await covid.get_total_recovered()
 
 
 @patch("covid.john_hopkins.covid.requests.get", return_value=MockRequestData())
-def test_exception_rasied_on_total_deaths(mock):
+async def test_exception_rasied_on_total_deaths(mock):
     covid = Covid()
     with pytest.raises(Exception):
-        covid.get_total_deaths()
+        await covid.get_total_deaths()
 
 
 @patch("covid.john_hopkins.covid.requests.get", return_value=MockRequestData())
-def test_exception_rasied_on_get_country_by_id(mock):
+async def test_exception_rasied_on_get_country_by_id(mock):
     covid = Covid()
     with pytest.raises(Exception):
-        covid.get_status_by_country_id(50)
+        await covid.get_status_by_country_id(50)
 
 
 @patch("covid.john_hopkins.covid.requests.get", return_value=MockRequestData())
-def test_exception_rasied_on_get_country_by_name(mock):
+async def test_exception_rasied_on_get_country_by_name(mock):
     covid = Covid()
     with pytest.raises(Exception):
-        covid.get_status_by_country_name("italy")
+        await covid.get_status_by_country_name("italy")

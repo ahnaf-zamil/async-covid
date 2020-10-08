@@ -19,8 +19,13 @@ class CovidModel(BaseModel):
     latitude: float = Field(None, alias="Lat")
     longitude: float = Field(None, alias="Long_")
     last_update: int = Field(0, alias="Last_Update")
+    
+    def __str__(self, *args):
+        return f"{self.__class__.__name__}<{', '.join([i + '=' + str(self.__dict__[i]) for i in self.__dict__])}>"
 
-
+    def __repr__(self):
+        return self.__str__(self)
+    
 class CountryModel(BaseModel):
     """Dataclass acts as a Model for Countries data
 
@@ -28,3 +33,9 @@ class CountryModel(BaseModel):
 
     id: str = Field(..., alias="OBJECTID")
     name: str = Field(..., alias="Country_Region")
+
+    def __str__(self, *args):
+        return f"{self.__class__.__name__}<{', '.join([i + '=' + str(self.__dict__[i]) for i in self.__dict__])}>"
+
+    def __repr__(self):
+        return self.__str__(self)
