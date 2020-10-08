@@ -22,6 +22,7 @@ async def johnhopkinsdata(covid):
 
 async def worldometersdata(covid):
     print("\n\nWorldometers data\n\n")
+    print(await covid.get_data())
     deaths = await covid.get_total_deaths()
     confirmed = await covid.get_total_confirmed_cases()
     recovered = await covid.get_total_recovered()

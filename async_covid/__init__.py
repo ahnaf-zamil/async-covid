@@ -4,10 +4,10 @@ from async_covid.john_hopkins import CovidModel as JohnHopkinsCovidModel
 from async_covid.worldometers import Covid as WorldometersCovid
 from async_covid import config
 
-__author__ = "Ahmed Nafies Okasha Mohamed <ahmed.nafies@gmail.com>"
-__copyright__ = "Copyright 2020, Ahmed Nafies Okasha Mohamed"
+__author__ = "K.M Ahnaf Zamil"
+__copyright__ = "Copyright 2020, K.M Ahnaf Zamil"
 __license__ = "MIT"
-__version__ = "2.4.0"
+__version__ = "0.0.10"
 
 
 def Covid(source=config.JOHN_HOPKINS):

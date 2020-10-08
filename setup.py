@@ -6,7 +6,7 @@ from setuptools import setup
 with io.open("README.md") as f:
     long_description = f.read()
 
-with io.open("covid/__init__.py", "rt", encoding="utf8") as f:
+with io.open("async_covid/__init__.py", "rt", encoding="utf8") as f:
     version = re.search(r'__version__ = "(.*?)"', f.read()).group(1)
 
 setup(
@@ -15,7 +15,6 @@ setup(
     description="An async Python package to get information regarding the novel corona virus provided by Johns Hopkins university and worldometers.info. Based on https://github.com/ahmednafies/covid",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://ahmednafies.github.io/covid/",
     author="K.M Ahnaf Zail",
     author_email="ahnafzamil@protonmail.com",
     license="MIT",
@@ -30,11 +29,9 @@ setup(
             "ipdb",
             "pre-commit",
             "black",
-        ],
-        "docs": ["mkdocs", "mkdocs-material"],
+        ]
     },
     project_urls={
-        "Documentation": "https://ahmednafies.github.io/covid/",
         "Source": "https://github.com/ahnaf-zamil/async-covid",
     },
     classifiers=[
@@ -45,7 +42,6 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
-    entry_points={"console_scripts": ["covid=covid.cli:app"]},
     zip_safe=False,
     python_requires=">=3.6",
 )
