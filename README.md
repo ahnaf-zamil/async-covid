@@ -9,7 +9,7 @@ by Johns Hopkins university and worldometers.info
 
 Documentation not ready yet, but everything is shown in this README file.
 
-![corona.jpeg](docs/img/corona.jpeg)
+![corona.jpeg](https://raw.githubusercontent.com/ahmednafies/covid/master/docs/img/corona.jpeg)
 
 ## Requirements
 
@@ -27,18 +27,30 @@ Documentation not ready yet, but everything is shown in this README file.
 
 ## How to use
 
+### Example
+
+```python
+import asyncio
+from async_covid import Covid
+
+async def main():
+    print(await covid.get_data())
+    
+if __name__ == __main__:
+    covid = COVID()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
+    loop.close()
+```
+
 ## John Hopkins University API
 
-![john_hopkins](docs/img/john_hopkins.png)
+![john_hopkins](https://raw.githubusercontent.com/ahmednafies/covid/master/docs/img/john_hopkins.png)
 
 ### Get All Data
 
 ```python
-from async_covid import Covid
-
-covid = Covid()
-# Make sure you are using an async function
-print(await covid.get_data())
+await covid.get_data()
 ```
 
 #### Result
@@ -78,8 +90,7 @@ when using `get_status_by_country_name`, eg. "The Republic of Moldova" or just "
 So use this when you need to know the country exact name that you can use.
 
 ```python
-# Make sure you are using an async function
-countries = await covid.list_countries()
+await covid.list_countries()
 ```
 
 #### Result
@@ -95,7 +106,7 @@ countries = await covid.list_countries()
 ### Get Status By Country ID
 
 ```python
-italy_cases = await covid.get_status_by_country_id(14)
+await covid.get_status_by_country_id(14)
 ```
 
 #### Result
@@ -117,7 +128,7 @@ CovidModel<
 ### Get Status By Country Name
 
 ```python
-italy_cases = await covid.get_status_by_country_name("bangladesh")
+ await covid.get_status_by_country_name("bangladesh")
 ```
 
 #### Result
@@ -139,30 +150,30 @@ CovidModel<
 ### Get Total Active cases
 
 ```python
-active = await covid.get_total_active_cases()
+await covid.get_total_active_cases()
 ```
 
 ### Get Total Confirmed cases
 
 ```python
-confirmed = await covid.get_total_confirmed_cases()
+await covid.get_total_confirmed_cases()
 ```
 
 ### Get Total Recovered cases
 
 ```python
-recovered = await covid.get_total_recovered()
+await covid.get_total_recovered()
 ```
 
 ### Get Total Deaths
 
 ```python
-deaths = await covid.get_total_deaths()
+await covid.get_total_deaths()
 ```
 
 ## Getting data from Worldometers.info
 
-![worldometers](docs/img/worldometers.png)
+![worldometers](https://raw.githubusercontent.com/ahmednafies/covid/master/docs/img/worldometers.png)
 
 ```python
 covid = Covid(source="worldometers")
